@@ -7,7 +7,7 @@ billingCompensatorQueue.suscribe(function(sBillIdentifier) {
     getBill(billIdentifier.id_bill, function (bill) {
         compensateUser(bill, function() {
             compensateBilling(bill, function() {
-                notifyBillingCompensationSuccess(bill.order.id_order);
+                notifyBillingCompensationSuccess(bill.order.id_order, bill.ID);
             });
         });
     });
@@ -37,11 +37,12 @@ function compensateBilling(bill, callback) {
     });
 }
 
-function notifyBillingCompensationSuccess(orderId) {
+function notifyBillingCompensationSuccess(orderId, billId) {
     var data = {
         state: true,
         reason: "Billing compensated successfully",
-        id_order: orderId
+        id_order: orderId,
+        id_bill: billId
     };
 
     billingCompensatorQueue.notify(data);

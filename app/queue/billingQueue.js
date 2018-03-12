@@ -31,6 +31,7 @@ function notify(data, callback) {
             var q = responseQueue;
             ch.assertQueue(q, {durable: false});
             var sData = JSON.stringify(data);
+            console.log("__Billing COMPENSATION sending to...", responseQueue, "\n");
             ch.sendToQueue(q, new Buffer(sData));
             console.log("__Billing status sent", data, "\n");
             if (callback) callback(data);
