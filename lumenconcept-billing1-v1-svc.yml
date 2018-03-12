@@ -1,0 +1,53 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: lumenconcept-billing1-v1-svc
+  name: lumenconcept-billing1-v1-svc
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: lumenconcept-billing1-v1-svc
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        run: lumenconcept-billing1-v1-svc
+    spec:
+      containers:
+      - name: lumenconcept-billing1-v1-svc
+        image: docker.io/zonumserdnaua/lumenconcept-billing1-v1
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: DB_ACCESS_KEY_ID
+            value: "insert_here_your_DB_ACCESS_KEY_ID"
+          - name: DB_SECRET_KEY
+            value: "insert_here_your_DB_SECRET_KEY"
+        ports:
+        - containerPort: 3001
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: lumenconcept-billing1-v1-svc
+  name: lumenconcept-billing1-v1-svc
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 3001
+  selector:
+    run: lumenconcept-billing1-v1-svc
+  sessionAffinity: None
+  type: LoadBalancer

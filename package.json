@@ -1,0 +1,16 @@
+{
+	"name": "microservice",
+	"version": "1.0.0",
+	"dependencies": {
+		"amqplib": "*",
+		"aws-sdk": "^2.207.0",
+		"body-parser": "*",
+		"express": "*",
+		"method-override": "*",
+		"nedb": "*",
+		"requestify": "*"
+	},
+	"scripts": {
+		"start": "node app/app.js"
+	}
+}
