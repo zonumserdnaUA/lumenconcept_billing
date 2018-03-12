@@ -19,8 +19,9 @@ function verifyFunds(order) {
     userHasFunds(totalPrice, order.userId, function(hasFunds, funds) {
         if (hasFunds) {
             updateUserFunds(order.userId, getNetPrice(totalPrice), funds, function () {
-                createBill(order, totalPrice);
-                notifyBillingSucceeded(order.id_order);
+                createBill(order, totalPrice, function(bill) {
+                    notifyBillingSucceeded(order.id_order, bill.ID);
+                });
             });
         } else {
             notifyBillingFailed(order.id_order);
@@ -38,7 +39,7 @@ function userHasFunds(totalPrice, userId, callback) {
     });
 }
 
-function createBill(order, totalPrice) {
+function createBill(order, totalPrice, callback) {
     var billId = generateBillId();
     var createdDate = getCurrentDate();
     var iva = getIva();
@@ -54,14 +55,17 @@ function createBill(order, totalPrice) {
         order: order
     };
 
-    billingDB.createBill(bill);
+    billingDB.createBill(bill, function() {
+        callback(bill);
+    });
 }
 
-function notifyBillingSucceeded(orderId) {
+function notifyBillingSucceeded(orderId, billId) {
     var data = {
         state: true,
         reason: "Order registered successfully",
-        id_order: orderId
+        id_order: orderId,
+        id_bill: billId
     };
     billingQueue.notify(data);
 }

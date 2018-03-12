@@ -28,7 +28,7 @@ function getUser(userId, callback) {
             console.log("__User ERROR getting user", err, "\n");
         } else {
             console.log("__USER SUCCEEDED getting user", data.Item, "\n");
-            callback(data.Item);
+            if (callback) callback(data.Item);
         }
     });
 }
@@ -52,7 +52,7 @@ function updateUserFunds(userId, newFunds, callback) {
             console.log("__User ERROR updating user", err, "\n");
         } else {
             console.log("__USER SUCCEEDED updating user", data, "\n");
-            callback();
+            if (callback) callback();
         }
     });
 }
