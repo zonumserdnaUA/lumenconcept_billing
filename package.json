@@ -6,8 +6,10 @@
 		"aws-sdk": "^2.207.0",
 		"body-parser": "*",
 		"express": "*",
+		"kafka-node": "^2.6.1",
 		"method-override": "*",
 		"nedb": "*",
+		"npm": "^6.0.0",
 		"requestify": "*"
 	},
 	"scripts": {
