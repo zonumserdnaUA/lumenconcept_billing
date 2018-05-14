@@ -1,31 +1,37 @@
 var billingQueue = require("../queue/billingQueue");
-var billingDB = require("../db/billingDB");
+var selfAdaptabilityQueue = require("../queue/selfAdaptabilityQueue");
 var userDB = require("../db/userDB");
+var billingUtil = require("../util/billingUtil");
+var billingDB = require("../db/billingDB");
 
 billingQueue.suscribe(function(sOrder) {
-    // console.log("received order", sOrder);
     var order = JSON.parse(sOrder);
-    verifyFunds(order.order);
+    order = order.order;
+    billingUtil.createBill(order, billingUtil.calculateTotalPrice(order.items), function(bill) {
+        selfAdaptabilityQueue.notify(bill, function() {});
+    });
 });
 
-function verifyFunds(order) {
-    var items = order.items;
-    var totalPrice = 0;
+selfAdaptabilityQueue.suscribe(function(billId) {
+    verifyFunds(billId);
+});
 
-    items.forEach(function(item) {
-        totalPrice = totalPrice + (item.amount*item.price);
-    });
+function verifyFunds(billId) {
+    console.log("***************** billId", billId);
+    billingDB.getBill("" + billId, function (bill) {
+        console.log("***************** bill", bill);
+        var totalPrice = bill.grossPrice;
+        var order = bill.order;
 
-    userHasFunds(totalPrice, order.userId, function(hasFunds, funds) {
-        if (hasFunds) {
-            updateUserFunds(order.userId, getNetPrice(totalPrice), funds, function () {
-                createBill(order, totalPrice, function(bill) {
+        userHasFunds(totalPrice, order.userId, function(hasFunds, funds) {
+            if (hasFunds) {
+                updateUserFunds(order.userId, billingUtil.getNetPrice(totalPrice), funds, function () {
                     notifyBillingSucceeded(order.id_order, bill.ID);
                 });
-            });
-        } else {
-            notifyBillingFailed(order.id_order);
-        }
+            } else {
+                notifyBillingFailed(order.id_order);
+            }
+        });
     });
 }
 
@@ -36,27 +42,6 @@ function userHasFunds(totalPrice, userId, callback) {
             hasFunds = true;
         }
         callback(hasFunds, user.funds);
-    });
-}
-
-function createBill(order, totalPrice, callback) {
-    var billId = generateBillId();
-    var createdDate = getCurrentDate();
-    var iva = getIva();
-    var netPrice = getNetPrice(totalPrice);
-
-    var bill = {
-        ID: billId,
-        bill_number: billId,
-        createdDate: createdDate,
-        iva: iva,
-        grossPrice: totalPrice,
-        netPrice: netPrice,
-        order: order
-    };
-
-    billingDB.createBill(bill, function() {
-        callback(bill);
     });
 }
 
@@ -77,23 +62,6 @@ function notifyBillingFailed(orderId) {
         id_order: orderId
     };
     billingQueue.notify(data);
-}
-
-function generateBillId() {
-    return "" + Math.floor((Math.random() * 10000) + 1);
-}
-
-function getCurrentDate() {
-    var now = new Date();
-    return now.toISOString();
-}
-
-function getIva() {
-    return 19;
-}
-
-function getNetPrice(grossPrice) {
-    return (1 + (getIva() / 100)) * grossPrice;
 }
 
 function updateUserFunds(userId, totalPrice, funds, callback) {

@@ -17,7 +17,7 @@ function suscribe(callback) {
     var consumer = getConsumer();
 
     consumer.on('message', function (message) {
-        callback(message);
+        if(callback) callback(message);
     });
 
     consumer.on('error', function (err) {
@@ -45,7 +45,7 @@ function notify(params, callback) {
     });
 
     producer.send(payloads, function (err, data) {
-        callback(data);
+        if(callback) callback(data);
     });
 }
 

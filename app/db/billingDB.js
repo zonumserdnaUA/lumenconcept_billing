@@ -25,7 +25,7 @@ function createBill(bill, callback) {
         if (err) console.log(err);
         else {
             console.log("__BILLING bill created successfully", bill);
-            if(callback) callback();
+            if(callback) callback(bill);
         }
     });
 }
