@@ -17,9 +17,7 @@ selfAdaptabilityQueue.suscribe(function(billId) {
 });
 
 function verifyFunds(billId) {
-    console.log("***************** billId", billId);
     billingDB.getBill("" + billId, function (bill) {
-        console.log("***************** bill", bill);
         var totalPrice = bill.grossPrice;
         var order = bill.order;
 

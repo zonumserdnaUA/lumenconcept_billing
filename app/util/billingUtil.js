@@ -1,4 +1,5 @@
 var billingDB = require("../db/billingDB");
+var userDB = require("../db/userDB");
 
 // public methods
 
@@ -19,23 +20,27 @@ function calculateTotalPrice(itemsInOrder) {
 }
 
 function createBill(order, totalPrice, callback) {
-    var billId = generateBillId();
-    var createdDate = getCurrentDate();
-    var iva = getIva();
-    var netPrice = getNetPrice(totalPrice);
+    userDB.getUser(order.userId, function (user) {
+        var billId = generateBillId();
+        var createdDate = getCurrentDate();
+        var iva = getIva();
+        var netPrice = getNetPrice(totalPrice);
+        var userLocation = user.location;
 
-    var bill = {
-        ID: billId,
-        bill_number: billId,
-        createdDate: createdDate,
-        iva: iva,
-        grossPrice: totalPrice,
-        netPrice: netPrice,
-        order: order
-    };
+        var bill = {
+            ID: billId,
+            bill_number: billId,
+            createdDate: createdDate,
+            iva: iva,
+            grossPrice: totalPrice,
+            netPrice: netPrice,
+            userLocation: userLocation,
+            order: order
+        };
 
-    billingDB.createBill(bill, function() {
-        callback(bill);
+        billingDB.createBill(bill, function() {
+            callback(bill);
+        });
     });
 }
 
