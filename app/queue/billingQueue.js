@@ -1,11 +1,13 @@
 var amqp = require('amqplib/callback_api');
 var requestQueue = "billing.request";
 var responseQueue = "billing.response";
+var selfAdaptabilityResponse = "selfAdaptability.payment.response";
 var queueURL = "amqp://vgleryqm:kwDm7WnQvfqeA4RX1DZXfmT-DWTxC3bu@skunk.rmq.cloudamqp.com/vgleryqm";
 
 // public methods
 
 exports.suscribe = suscribe;
+exports.suscribePaymentState = suscribePaymentState;
 exports.notify = notify;
 
 // private methods
@@ -21,6 +23,21 @@ function suscribe(callback) {
             }, {noAck: true});
 
             console.log("__Billing queue connection successful\n");
+        });
+    });
+}
+
+function suscribePaymentState(callback) {
+    amqp.connect(queueURL, function(err, conn) {
+        conn.createChannel(function(err, ch) {
+            var q = selfAdaptabilityResponse;
+            ch.assertQueue(q, {durable: false});
+            ch.consume(q, function(msg) {
+                console.log("__Billing suscribePaymentState received", msg.content.toString(), "\n");
+                callback(msg.content.toString());
+            }, {noAck: true});
+
+            console.log("__Billing queue suscribePaymentState connection successful\n");
         });
     });
 }
