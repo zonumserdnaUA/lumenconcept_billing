@@ -1,6 +1,6 @@
 var amqp = require('amqplib/callback_api');
-var requestQueue = "billing.request";
-var responseQueue = "billing.response";
+var requestQueue = "billing1.request";
+var responseQueue = "billing1.response";
 var queueURL = "amqp://vgleryqm:kwDm7WnQvfqeA4RX1DZXfmT-DWTxC3bu@skunk.rmq.cloudamqp.com/vgleryqm";
 
 // public methods
